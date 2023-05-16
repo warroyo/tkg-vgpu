@@ -28,7 +28,7 @@ In this case we do not want to enable passthrough we just want to enable the "sh
 
 ## Setup vGPU profile based TKG templates
 
-Becuase CAPV does not support vGPU today we need to work around this by creating some vSphere templates that already have the gpu profiles added as pci devices. CAPv support passthrough for GPU by adding a pci device, however the way that adding a vGPU works in vCenter has a slightly different api so this can't be done thropugh CAPV today.
+Becuase CAPV does not support vGPU today we need to work around this by creating some vSphere templates that already have the gpu profiles added as pci devices. CAPv support passthrough for GPU by adding a pci device, however the way that adding a vGPU works in vCenter has a slightly different api so this can't be done thropugh CAPv today.
 
 
 **If you are running TKG 1.x you will first need to create an EFI ubuntu image [using BYOI](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.6/vmware-tanzu-kubernetes-grid-16/GUID-build-images-linux.html). In TKG 2.x EFI templates are shipped with the product so we can just use one of those.**
@@ -48,7 +48,7 @@ Get a list of the profiles that are available for your GPU.These will differ bas
 
 **NOTES:**
 
-* You can find out what the different profiles mean through the nvidia docs. For the example above with a T4 the different types of vgpu are [here](https://docs.nvidia.com/grid/10.0/grid-vgpu-user-guide/index.html#vgpu-types-tesla-t4). Since this use case is with TKG fro traning workloads we can see on the doc the best profiles for that are the `c` profiles.
+* You can find out what the different profiles mean through the nvidia docs. For the example above with a T4 the different types of vgpu are [here](https://docs.nvidia.com/grid/10.0/grid-vgpu-user-guide/index.html#vgpu-types-tesla-t4). Since this use case is with TKG for traning workloads we can see on the doc the best profiles for that are the `c` profiles.
 
 
 ### Create vGPU profile templates
