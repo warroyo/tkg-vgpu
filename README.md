@@ -147,7 +147,7 @@ tanzu cluster node-pool list <cluster-name>
 
 COMING SOON
 
-## deploy GPU operator
+## Deploy the NVIDIA GPU operator
 
 The GPU operator will be deployed from the [ NVAIE catalog](https://catalog.ngc.nvidia.com/?filters=&orderBy=weightPopularASC&query=). Prior to starting this step make sure you have your [NGC API Token](https://resources.nvidia.com/en-us-nvaie/quick-start-guide-nvaie) to access the private registry.
 
