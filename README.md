@@ -53,7 +53,7 @@ Get a list of the profiles that are available for your GPU.These will differ bas
 
 ### Create vGPU profile templates
 
-This step is how we work around the limitation of CAPv today mentioned above. Since this is for AI workloads we will onyl create templates for the profiles that meet that type. In the case of this example it will be 16c, 8c, and 4c. If you are using mig the profiles will look different you can see [this doc](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#a100-profiles) for details. 
+This step is how we work around the limitation of CAPv today mentioned above. Since this is for AI workloads we will only create templates for the profiles that meet that type. In the case of this example it will be 16c, 8c, and 4c. If you are using mig, the profiles will look different you can see [this doc](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#a100-profiles) for details. 
 
 For each relevant profile take the following steps.
 
@@ -67,19 +67,19 @@ For each relevant profile take the following steps.
 
 ## Create a nodepool with GPU
 
-This is a slightly different process based on which version of TKg you are on and whether or not you are adding a nodepool to an existing cluster. The sections below are broken out by scenario.
+This is a slightly different process based on which version of TKG you are on and whether or not you are adding a nodepool to an existing cluster. The sections below are broken out by scenario.
 
 ### TKG 1.6 - new cluster
 
 This approach makes use of an overlay to be able to add nodepools mainly due to some extra config that is needed that the tanzu cli nodepools command doesn't support today. The overlay and docs are [here](https://github.com/warroyo/tkg-overlays/tree/main/vsphere/nodepools#usage-for-new-clusters) but this will outline the steps as well.
 
-1. Create a new directory on the workstation you use to create TKg clusters. 
+1. Create a new directory on the workstation you use to create TKG clusters. 
    ```
    mkdir -p ~/.config/tanzu/tkg/providers/ytt/03_customizations/nodepools
    ``` 
 2. Copy the `nodepools_values.yml` and the `nodepools.yml` from the above linked repo into the new `nodepools` directory. 
 3. Create/modify your new cluster yaml file. This should be the file you are passing to the tanzu cli to create the cluster. Official docs for creating a workload cluster config file are [here](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.6/vmware-tanzu-kubernetes-grid-16/GUID-tanzu-k8s-clusters-index.html#create-a-workload-cluster-configuration-file-1.). You can also find the full workload cluster template [here](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.6/vmware-tanzu-kubernetes-grid-16/GUID-tanzu-k8s-clusters-vsphere.html).
-4. Add the Nodepool settings to the cluster yaml file. Below is an example.The full option set is [here](https://github.com/warroyo/tkg-overlays/blob/main/vsphere/nodepools/cluster_config.yml) anything that is omitted will be inherited from the main cluster values. The important pieces here are the `template` and the `customVMX`. The `64bitMMIOSizeGB` shoudl be calcuated based off of your GPU size. 
+4. Add the Nodepool settings to the cluster yaml file. Below is an example. The full option set is [here](https://github.com/warroyo/tkg-overlays/blob/main/vsphere/nodepools/cluster_config.yml) anything that is omitted from the `extrapools` settings will be inherited from the main cluster values. The important pieces here are the `template` and the `customVMX`. The `64bitMMIOSizeGB` shoudl be calcuated based off of your GPU size. 
 ```yaml
 EXTRA_NODE_POOLS: true
 extrapools: |
@@ -95,7 +95,7 @@ extrapools: |
 5. Create a cluster as you typically would. This config above will create a nodepool in the cluster called gpu-pool
 
 ```
-tanzu create cluster -f <workload-ckluster-yaml>
+tanzu create cluster -f <workload-cluster-yaml>
 ```
 
 
@@ -122,9 +122,9 @@ Adding a new node pool is done using the same overlays that are used in the abov
 
 1. Follow steps 1-4 from the section above on creating a new cluster.
 
-2. Change into the TKg mgmt cluster context
+2. Change into the TKG mgmt cluster context
 
-3. Run the following command. This command will run generate the yaml to create a new cluster but by adding `ADD_POOLS=true` it will only generate the nodepool yaml and apply that to the existing cluster.
+3. Run the following command. This command will generate the yaml to create a new cluster but by adding `ADD_POOLS=true` it will only generate the nodepool yaml and apply that to the existing cluster.
 
 ```bash
 ADD_POOLS=true tanzu cluster create -f <workload-ckluster-yaml> --dry-run | kubectl apply -f-
@@ -148,7 +148,7 @@ tanzu cluster node-pool list <cluster-name>
 
 ## deploy GPU operator
 
-The GPU operator will be deployed from the NVAIE catalog. Prior to starting this step make sure you have your NGC API Token to access the private registry.
+The GPU operator will be deployed from the [ NVAIE catalog](https://catalog.ngc.nvidia.com/?filters=&orderBy=weightPopularASC&query=). Prior to starting this step make sure you have your [NGC API Token](https://resources.nvidia.com/en-us-nvaie/quick-start-guide-nvaie) to access the private registry.
 
 In this guide we are deploying the `v22.9.1` operator helm chart. This is due to the version alignment between the ESX Drivers and the client drivers that get deployed by the operator. You will need to be sure that you are pulling the right version of the operator and updating the script below according to what your environment needs. 
 
@@ -160,10 +160,10 @@ The script below takes a very standard approach to deploying the helm chart. If 
 export NGC_API_KEY='token-here'
 ````
 
-2. Get the client configuartion token from the license server. we will need to create a file called `client_configuration_token.tok` it is very important to name this exactly that. The operator requires this naming. Place this file in the working directory where you will run the below script. This file will be add into a config map by the script.
+2. [Get the client configuration token](https://docs.nvidia.com/ai-enterprise/latest/quick-start-guide/index.html#generating-client-configuration-token-for-cls-instance) from the license server. we will need to create a file called `client_configuration_token.tok` it is very important to name this exactly that. The operator requires this naming. Place this file in the working directory where you will run the below script. This file will be added into a config map by the script.
 
 
-3. copy the below content into a file and make it executable
+3. Copy the below content into a file and make it executable
 
 ```bash
 #!/bin/bash
