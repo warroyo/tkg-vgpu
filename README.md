@@ -1,6 +1,6 @@
 # VGPU with TKGm
 
-This doc outlines a process for using NVIDIA vGPU capabilties with TKGm(TKG w/standalone management cluster). **This process is not officially supported by VMware**. There are two ways of using VGPU capabilties, multi instance and time slicing. This doc will cover both.
+This doc outlines a process for using NVIDIA vGPU capabilties with TKGm(TKG w/standalone management cluster). There are two ways of using VGPU capabilties, multi instance and time slicing. This doc will cover both.
 
 
 ## Install ESX Drivers for NVAIE
