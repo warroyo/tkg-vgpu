@@ -145,6 +145,7 @@ tanzu cluster node-pool list <cluster-name>
 
 ### TKG 2.1 - new cluster
 
+COMING SOON
 
 ## deploy GPU operator
 
