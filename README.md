@@ -31,7 +31,7 @@ In this case we do not want to enable passthrough we just want to enable the "sh
 Becuase CAPV does not support vGPU today we need to work around this by creating some vSphere templates that already have the gpu profiles added as pci devices. CAPv support passthrough for GPU by adding a pci device, however the way that adding a vGPU works in vCenter has a slightly different api so this can't be done thropugh CAPv today.
 
 
-**If you are running TKG 1.x you will first need to create an EFI ubuntu image [using BYOI](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.6/vmware-tanzu-kubernetes-grid-16/GUID-build-images-linux.html). In TKG 2.x EFI templates are shipped with the product so we can just use one of those.**
+**If you are running TKG 1.x you will first need to create an EFI ubuntu image [using BYOI](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/1.6/vmware-tanzu-kubernetes-grid-16/GUID-build-images-linux.html), when building the image be sure to use the command `build-node-ova-vsphere-ubuntu-2004-efi`. In TKG 2.x EFI templates are shipped with the product so we can just use one of those.**
 
 ### Get the list of available profiles
 
