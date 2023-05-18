@@ -80,8 +80,10 @@ For TKG 2.x we want to create a new TKR and OS image this way we can use the new
 4.  edit the vApp Options on the VM and change the `DISTRO_NAME` field to have the GPU profile added. ex. `ubuntu-t4-4c`
    ![](images/2023-05-18-08-16-52.png)
    ![](images/2023-05-18-08-28-58.png)
-5. Convert the VM back to a template.
-6. Create a new OSImage. This example is using the 1.24.10 TKR, if you are using a different one be sure to update appropriately. you can copy an existing `OSImage` and edit that. In the below yaml the fields that were updated from the original that was copied are: `labels.os-name`,`name`,  `spec.os.name`
+5. Also edit the vApp option for `DISTRO_VERSION` and change it to `2004`. removing the `.` , this is really only needed if you plan to use TMC to manage these clusters. 
+   ![](images/2023-05-18-11-41-44.png)
+6. Convert the VM back to a template.
+7. Create a new OSImage. This example is using the 1.24.10 TKR, if you are using a different one be sure to update appropriately. you can copy an existing `OSImage` and edit that. In the below yaml the fields that were updated from the original that was copied are: `labels.os-name`,`name`,  `spec.os.name`
 
 ```yaml
 apiVersion: run.tanzu.vmware.com/v1alpha3
