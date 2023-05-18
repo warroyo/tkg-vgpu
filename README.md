@@ -248,6 +248,15 @@ tanzu cluster node-pool list <cluster-name>
 
 Becuase TKG 2.1 uses cluster class all we need to do to add to an existing cluster is to edit the cluster yaml and add the new worker pool and re-apply. These steps will be the exact same as the above steps for creating a new cluster. 
 
+### TKG 2.1 - TMC
+
+Asumming the steps above to set the vApp DISTRO_VERSION to `2004` was followed you can use TCM to create node pools with gpu. you can do this either when creating the cluster or after the fact.
+
+1. when adding a node pool you should see a new "OS version"  for the OSImage we created. choose that one.
+2. also add the custom vmx keys in the advanced options
+
+![](images/2023-05-18-11-58-24.png)
+
 ## Deploy the NVIDIA GPU operator
 
 The GPU operator will be deployed from the [ NVAIE catalog](https://catalog.ngc.nvidia.com/?filters=&orderBy=weightPopularASC&query=). Prior to starting this step make sure you have your [NGC API Token](https://resources.nvidia.com/en-us-nvaie/quick-start-guide-nvaie) to access the private registry.
