@@ -214,7 +214,7 @@ TKG 2.x uses cluster class based cluster so the approach to creating a cluster i
 tanzu cluster create my-cluster --file my-cluster-config.yaml --dry-run > my-gpu-spec.yaml
 ```
 
-2. Edit the generated file and add a nodepool for GPU workers. The below yaml can be added to the `workers` section of the file.
+2. Edit the generated file and add a nodepool for GPU workers. The below yaml can be added to the `workers` section of the file. Notice that the `resolve-os-image`  annotation is referencing the `os-name` for the new `OSImage` we created in a previous step. this is how the new template that has the gpu attached is resolved. 
 
 ```yaml
 - class: tkg-worker
