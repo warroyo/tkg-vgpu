@@ -55,6 +55,11 @@ Get a list of the profiles that are available for your GPU.These will differ bas
 
 This step is how we work around the limitation of CAPv today mentioned above. Since this is for AI workloads we will only create templates for the profiles that meet that type. In the case of this example it will be 16c, 8c, and 4c. If you are using mig, the profiles will look different you can see [this doc](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#a100-profiles) for details. 
 
+The Process is slightly different  between TKG 1.x and 2.x so use the appropriate section below.
+
+
+#### TKG 1.6
+
 For each relevant profile take the following steps.
 
 1. Copy the EFI based TKG template to a new template and rename it to something meaninful with the profile name in it. ex. `ubuntu-2004-efi-kube-v1.23.8-t4-4c`
@@ -62,6 +67,62 @@ For each relevant profile take the following steps.
 3. Edit the settings on the VM and add the PCI device with the GPU profile that matches the name you gave the template and click ok to exit the settings. 
 ![](images/2023-05-12-14-49-10.png)
 4. convert the VM back to a template.
+
+
+#### TKG 2.1
+
+For TKG 2.x we want to create a new TKR and OS image this way we can use the new template without having to create a custom cluster class.
+
+1. Copy the EFI based TKG template to a new template and rename it to something meaninful with the profile name in it. ex. `ubuntu-2004-efi-kube-v1.24.10+vmware.1-t4-4c`
+2. Convert the newly created template to a VM and place it on a host that has the GPU available. 
+3. Edit the settings on the VM and add the PCI device with the GPU profile that matches the name you gave the template and click ok to exit the settings. 
+![](images/2023-05-12-14-49-10.png)
+4.  edit the vApp Options on the VM and change the `DISTRO_NAME` field to have the GPU profile added. ex. `ubuntu-t4-4c`
+   ![](images/2023-05-18-08-16-52.png)
+   ![](images/2023-05-18-08-28-58.png)
+5. Convert the VM back to a template.
+6. Create a new OSImage. This example is using the 1.24.10 TKR, if you are using a different one be sure to update appropriately. you can copy an existing `OSImage` and edit that. In the below yaml the fields that were updated from the original that was copied are: `labels.os-name`,`name`,  `spec.os.name`
+
+```yaml
+apiVersion: run.tanzu.vmware.com/v1alpha3
+kind: OSImage
+metadata:
+  labels:
+    image-type: ova
+    os-arch: amd64
+    os-name: ubuntu-t4-4c
+    os-type: linux
+    os-version: "2004"
+    ova-version: v1.24.10---vmware.1-tkg.1-765d418b72c247c2310384e640ee075e
+    v1: ""
+    v1.24: ""
+    v1.24.10: ""
+    v1.24.10---vmware: ""
+    v1.24.10---vmware.1: ""
+  name: v1.24.10---vmware.1-tkg.1-gpu-t4-4c
+spec:
+  image:
+    ref:
+      version: v1.24.10+vmware.1-tkg.1-765d418b72c247c2310384e640ee075e
+    type: ova
+  kubernetesVersion: v1.24.10+vmware.1
+  os:
+    arch: amd64
+    name: ubuntu-t4-4c
+    type: linux
+    version: "2004"
+```
+
+
+7. edit the existing TKR for this version. in this case it is  `v1.24.10---vmware.1-tkg.2` and add the new image to the list of images.
+
+```yaml
+osImages:
+  - name: v1.24.10---vmware.1-tkg.1-fbb49de6d1bf1f05a1c3711dea8b9330
+  - name: v1.24.10---vmware.1-tkg.1-765d418b72c247c2310384e640ee075e
+  - name: v1.24.10---vmware.1-tkg.1-226b7a84930e5368c38aa867f998ce33
+  - name: v1.24.10---vmware.1-tkg.1-gpu-t4-4c
+```
 
 
 
@@ -145,7 +206,45 @@ tanzu cluster node-pool list <cluster-name>
 
 ### TKG 2.1 - new cluster
 
-COMING SOON
+TKG 2.x uses cluster class based cluster so the approach to creating a cluster is slightly different. Follow the docs [here](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/2.1/using-tkg-21/workload-clusters-configure-vsphere.html#create-an-object-spec-file-3) to generate the initial cluster yaml that we will use. This approach uses the "Object spec file" approach, which just means it's using the k8s reosurces directly instead of directly creating the cluster with the Tanzu cli. The Tanzu cli is still used to generate the object spec.
+
+1. generate the cluster object spec per the docs
+
+```bash
+tanzu cluster create my-cluster --file my-cluster-config.yaml --dry-run > my-gpu-spec.yaml
+```
+
+2. Edit the generated file and add a nodepool for GPU workers. The below yaml can be added to the `workers` section of the file.
+
+```yaml
+- class: tkg-worker
+  metadata:
+    annotations:
+      run.tanzu.vmware.com/resolve-os-image: image-type=ova,os-name=ubuntu-t4-4c
+  name: gpu-t4-4c
+  replicas: 1
+  variables:
+    overrides:
+    - name: worker
+      value:
+        machine:
+          diskGiB: 40
+          memoryMiB: 8192  
+          numCPUs: 4
+          customVMXKeys: 
+            pciPassthru.use64BitMMIO: 'true'
+            pciPassthru.64bitMMIOSizeGB: '32'
+```
+3. apply the yaml into the mgmt cluster.
+4. validate that the new node-pool is up
+
+```
+tanzu cluster node-pool list <cluster-name>
+```
+
+### TKG 2.1 - existing cluster
+
+Becuase TKG 2.1 uses cluster class all we need to do to add to an existing cluster is to edit the cluster yaml and add the new worker pool and re-apply. These steps will be the exact same as the above steps for creating a new cluster. 
 
 ## Deploy the NVIDIA GPU operator
 
@@ -154,6 +253,8 @@ The GPU operator will be deployed from the [ NVAIE catalog](https://catalog.ngc.
 In this guide we are deploying the `v22.9.1` operator helm chart. This is due to the version alignment between the ESX Drivers and the client drivers that get deployed by the operator. You will need to be sure that you are pulling the right version of the operator and updating the script below according to what your environment needs. 
 
 The script below takes a very standard approach to deploying the helm chart. If you need to modify any values of the chart you will need to pull down the chart values and update the values prior to deploying.
+
+**NOTE lower memory < 8GB tends to be a problem when installing the the gpu operator**
 
 1. export your NGC api token. 
 
