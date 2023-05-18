@@ -250,7 +250,7 @@ Becuase TKG 2.1 uses cluster class all we need to do to add to an existing clust
 
 ### TKG 2.1 - TMC
 
-Asumming the steps above to set the vApp DISTRO_VERSION to `2004` was followed you can use TCM to create node pools with gpu. you can do this either when creating the cluster or after the fact.
+Asumming the steps above to set the vApp DISTRO_VERSION to `2004` was followed you can use TMC to create node pools with gpu. you can do this either when creating the cluster or after the fact.
 
 1. when adding a node pool you should see a new "OS version"  for the OSImage we created. choose that one.
 2. also add the custom vmx keys in the advanced options
